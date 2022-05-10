@@ -1,20 +1,22 @@
 import json
 import logging
+import re
 import sys
 
 from canary.api import Api
 
 LIVE_STREAM = True
 
+
 def read_settings():
-    with open("./canary_login.json", "r") as openfile:
+    with open("./canary_login.json") as openfile:
         # Reading from json file
         json_object = json.load(openfile)
         try:
-            if json_object['token'] == '':
-                json_object['token'] = None
+            if json_object["token"] == "":
+                json_object["token"] = None
         except KeyError:
-            json_object['token'] = None
+            json_object["token"] = None
         return json_object
 
 
@@ -29,11 +31,11 @@ if __name__ == "__main__":
 
     settings = read_settings()
 
-    if settings['username'] == "change me" or settings['password'] == "change me":
+    if settings["username"] == "change me" or settings["password"] == "change me":
         print("Please change the login credentials from 'change me' to your info.")
         sys.exit(1)
 
-    canary = Api(username=settings['username'], password=settings['password'])
+    canary = Api(username=settings["username"], password=settings["password"])
 
     locations_by_id = {}
     readings_by_device_id = {}
@@ -60,7 +62,11 @@ if __name__ == "__main__":
                     logger.info(
                         "device %s live stream session url = %s",
                         device.name,
-                        lss.live_stream_url,
+                        re.sub(
+                            r"watchlive/[0-9]+/[a-z0-9]+/",
+                            "watchlive/--loc_id--/--hash--/",
+                            lss.live_stream_url,
+                        ),
                     )
 
     logger.info("Latest Readings by device...")
