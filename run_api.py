@@ -52,6 +52,8 @@ if __name__ == "__main__":
                 device.device_type["name"],
                 "online" if device.is_online else "offline",
             )
+            logger.info("-- watch live? %s", device.watch_live)
+            logger.info("-- firmware v%s", device.firmware_version)
             if device.is_online:
                 readings_by_device_id[device.device_id] = canary.get_latest_readings(
                     device.device_id
@@ -68,7 +70,9 @@ if __name__ == "__main__":
                             r"watchlive/\d+/[a-z\d]+/",
                             "watchlive/--loc_id--/--hash--/",
                             lss.live_stream_url,
-                        ) if REDACT else lss.live_stream_url,
+                        )
+                        if REDACT
+                        else lss.live_stream_url,
                     )
 
         logger.info("Latest Readings by device...")
