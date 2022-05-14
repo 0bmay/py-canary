@@ -6,6 +6,7 @@ import sys
 from canary.api import Api
 
 LIVE_STREAM = True
+REDACT = False
 
 
 def read_settings():
@@ -59,26 +60,27 @@ if __name__ == "__main__":
                 # cookies that need to be set.
                 if LIVE_STREAM:
                     lss = canary.get_live_stream_session(device=device)
+
                     logger.info(
                         "device %s live stream session url = %s",
                         device.name,
                         re.sub(
-                            r"watchlive/[0-9]+/[a-z0-9]+/",
+                            r"watchlive/\d+/[a-z\d]+/",
                             "watchlive/--loc_id--/--hash--/",
                             lss.live_stream_url,
-                        ),
+                        ) if REDACT else lss.live_stream_url,
                     )
 
-    logger.info("Latest Readings by device...")
-    for key in readings_by_device_id:
-        for reading in readings_by_device_id[key]:
-            # yes this loop is not really needed,
-            # but to anonymize the device id's we need it
-            for device in location.devices:
-                if device.device_id == key:
-                    logger.info(
-                        "device %s - sensor: %s value: %s",
-                        device.name,
-                        reading.sensor_type.name,
-                        reading.value,
-                    )
+        logger.info("Latest Readings by device...")
+        for key in readings_by_device_id:
+            for reading in readings_by_device_id[key]:
+                # yes this loop is not really needed,
+                # but to anonymize the device id's we need it
+                for device in location.devices:
+                    if device.device_id == key:
+                        logger.info(
+                            "device %s - sensor: %s value: %s",
+                            device.name,
+                            reading.sensor_type.name,
+                            reading.value,
+                        )
